@@ -127,6 +127,8 @@ void init_transaction_modal_entry(GtkWidget *vbox, GtkWidget *date, GtkWidget *d
 int validation_date(GtkWidget *date)
 {
 	const char *date_text=gtk_entry_get_text(GTK_ENTRY(date));
+	if(strlen(date_text)>10)
+		return 0;
 	for(int i=0; i<=1; i++)
 		if(!check_number(date_text[i]))
 			return 0;
@@ -239,7 +241,7 @@ void show_transaction_modal(GtkWidget *widget, gpointer *window)
     gtk_window_set_title(GTK_WINDOW(dialog), "Add transaction");
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window));//aduce modal pe planul aplicatiei
    	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);//pe plan principal
-    gtk_widget_set_size_request(dialog, 800, 600);
+    gtk_widget_set_size_request(dialog, 800, 400);
     
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
     gtk_container_add(GTK_CONTAINER(modal_area), vbox);
@@ -285,6 +287,12 @@ int get_sum_preprocess_all_entry()
 }
 int transform_integer_to_chars(char *string, int number, int poz)
 {
+	if(!number && poz==0)
+	{
+		string[0]='0';
+		string[1]='\0';
+		return 1;
+	}
 	if(!number)
 	{
 		string[poz]='\0';
@@ -482,6 +490,69 @@ void display_previous_transactions_modal(GtkWidget *widget, gpointer *window)
     gtk_widget_show_all(dialog);
 }
 GtkWidget *start_date, *end_date;
+char *get_year_from_date(const char *date)
+{
+	char *year=malloc(10);
+	for(int i=0; i<=3; i++)
+		year[i]=date[6+i];
+	year[4]='\0';
+	return year;
+}
+char *get_month_from_date(const char *date)
+{
+	char *month=malloc(10);
+	for(int i=0; i<=1; i++)
+		month[i]=date[3+i];
+	month[2]='\0';
+	return month;
+}
+char *get_day_from_date(const char *date)
+{
+	char *day=malloc(10);
+	for(int i=0; i<=1; i++)
+		day[i]=date[i];
+	day[2]='\0';
+	return day;
+}
+int compare_date(const char *date1, const char *date2)///return 1 if date1<date2
+{
+	if(transform_chars_to_integer(get_year_from_date(date1))>transform_chars_to_integer(get_year_from_date(date2)))
+		return 0;
+	if(transform_chars_to_integer(get_year_from_date(date1))<transform_chars_to_integer(get_year_from_date(date2)))
+		return 1;
+		
+	if(transform_chars_to_integer(get_month_from_date(date1))>transform_chars_to_integer(get_month_from_date(date2)))
+		return 0;
+	if(transform_chars_to_integer(get_month_from_date(date1))<transform_chars_to_integer(get_month_from_date(date2)))
+		return 1;
+		
+	if(transform_chars_to_integer(get_day_from_date(date1))>transform_chars_to_integer(get_day_from_date(date2)))
+		return 0;
+	return 1;
+}
+int calculate_period(const char *date1, const char *date2, int type)
+{
+	FILE *file;
+	file=fopen("transaction.in", "r");
+	struct transaction rez[10];
+	int rez_len=0;
+	int sum_total=0;
+	for(int i=1; i<=get_id_file(); i++)
+	{
+		char buffer[105];
+		fgets(buffer, 100, file);
+		int j;
+		for(j=0; buffer[j]!='\n'; j++);
+		buffer[j]='\0';
+		struct transaction element=create_transaction(buffer);
+		if(compare_date(date1, element.date) && compare_date(element.date, date2))//date1<=element.date && element.date<=date2
+			if(type==0 && element.type==0)
+				sum_total+=element.amount;
+			else if(type==1 && element.type==1)
+				sum_total+=element.amount;
+	}
+	return sum_total;
+}
 void financial_report_modal(GtkWidget *widget, gpointer *window)
 {
 	GtkWidget *dialog=gtk_dialog_new();
@@ -489,7 +560,7 @@ void financial_report_modal(GtkWidget *widget, gpointer *window)
     gtk_window_set_title(GTK_WINDOW(dialog), "Dialog");
     gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window));//aduce modal pe planul aplicatiei
    	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);//pe plan principal
-    gtk_widget_set_size_request(dialog, 400, 200);
+    gtk_widget_set_size_request(dialog, 800, 400);
     gtk_window_set_resizable(GTK_WINDOW (dialog), 0);
     
     GtkWidget *grid = gtk_grid_new();
@@ -507,6 +578,44 @@ void financial_report_modal(GtkWidget *widget, gpointer *window)
     	GtkWidget *error = gtk_label_new("End date is invalid");
     	gtk_grid_attach(GTK_GRID(grid), error, 1, 1, 1, 1);
     	flag=0;
+    }
+    if(flag)
+    {
+    	const char *start_date_text=gtk_entry_get_text(GTK_ENTRY(start_date));
+    	const char *end_date_text=gtk_entry_get_text(GTK_ENTRY(end_date));
+   		if(compare_date(start_date_text, end_date_text))
+   		{
+   			char *income_print=malloc(100);
+   			strcpy(income_print, "Your incomes between ");
+   			strcat(income_print, start_date_text);
+   			strcat(income_print, " and ");
+   			strcat(income_print, end_date_text);
+   			strcat(income_print, " is:");
+   			char *income_val_text=malloc(50);
+   			transform_integer_to_chars(income_val_text, calculate_period(start_date_text, end_date_text, 0), 0);
+   			strcat(income_print, income_val_text);
+			GtkWidget *income_label = gtk_label_new(income_print);
+			
+			char *expenses_print=malloc(100);
+   			strcpy(expenses_print, "Your expenses between ");
+   			strcat(expenses_print, start_date_text);
+   			strcat(expenses_print, " and ");
+   			strcat(expenses_print, end_date_text);
+   			strcat(expenses_print, " is: ");
+   			char *expenses_val_text=malloc(50);
+   			transform_integer_to_chars(expenses_val_text, calculate_period(start_date_text, end_date_text, 1), 0);
+   			strcat(expenses_print, expenses_val_text);
+
+			GtkWidget *expense_label = gtk_label_new(expenses_print);
+			gtk_grid_attach(GTK_GRID(grid), income_label, 1, 0, 1, 1);
+			gtk_grid_attach(GTK_GRID(grid), expense_label, 1, 1, 1, 1);
+		}
+		else
+		{
+			GtkWidget *error = gtk_label_new("Logic error");
+    		gtk_grid_attach(GTK_GRID(grid), error, 1, 1, 1, 1);
+    	}
+		
     }
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_show_all(dialog);
