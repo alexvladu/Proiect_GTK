@@ -1,0 +1,12 @@
+Proiectul https://github.com/alexvladu/Proiect_GTK a fost realizat in decurs a 7 zile lucratoare si 25 de ore de scris cod.
+GTK3 (GIMP Toolkit 3) este o bibliotecă de interfață grafică open-source, care oferă un set de instrumente și funcționalități pentru dezvoltarea aplicațiilor cu interfață grafică utilizator (GUI). 
+Acesta este folosit pentru crearea de aplicații pentru desktop în diverse medii de lucru, cum ar fi Linux, dar este disponibil și pentru alte platforme, inclusiv Windows și macOS.
+GTK3 oferă un set de unelte pentru a construi interfețe grafice consistente și moderne. 
+Acesta include o serie de elemente de interfață grafică, cum ar fi butoane, casete de text, ferestre, meniuri și multe altele, precum și facilități pentru manipularea evenimentelor de utilizator și pentru gestionarea elementelor interfeței grafice.
+Un aspect important al GTK3 este că este un mediu de dezvoltare multi-platformă și poate fi utilizat în diferite limbaje de programare precum C, C++, Python, și multe altele, deoarece există legături și wrapper-e disponibile pentru multe limbaje de programare populare.
+GTK3 este versiunea actualizată a GTK2 și aduce îmbunătățiri în ceea ce privește performanța, flexibilitatea și aspectul vizual al interfeței grafice. Este folosit într-o gamă largă de aplicații, de la medii desktop la programe mai complexe, precum editoare grafice, medii de dezvoltare integrate (IDE-uri), aplicații de productivitate și multe altele.
+
+Task-ul pe care trebuie sa il rezolve aplicatia este manipularea tranzactiilor. Aceasta contine functii de adaugare tranzactie, vizualizare, generare raport si check balance.
+Aplicatia este interactiva cu utilizatorul deoarece este foarte sugestiva la folosirea acesteia. Contine implementari de check(verificari/manipulari introducere de date). Aceasta raporteaza erori in caz ca
+utilizatorul introduce ceva care nu are legatura. Afisarea tranzactiilor este bazata pe o paginare a cate 5 elemente pe pagina, cu butoane de left/right care permite navigarea intre pagini, daca este pagina 1, nu permite 
+deplasarea la stanga, iar daca pagina este cea finala, nu permite deplasarea la dreapta.
